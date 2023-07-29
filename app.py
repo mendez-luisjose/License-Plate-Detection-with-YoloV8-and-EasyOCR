@@ -139,8 +139,9 @@ with body :
     _, col1, _ = st.columns([0.1,1,0.2])
     col1.subheader("Check It-out the License Car Plate Detection Model 🔎!")
 
-    img = st.file_uploader("Upload a Car Image: ", type=["png", "jpg", "jpeg"])
-
+    #img = st.file_uploader("Upload a Car Image: ", type=["png", "jpg", "jpeg"])
+    img = st.camera_input("Take a Photo: ")
+    
     _, col2, _ = st.columns([0.3,1,0.2])
 
     _, col5, _ = st.columns([0.8,1,0.2])
