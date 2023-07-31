@@ -27,6 +27,11 @@ license_plate_detector = YOLO(LICENSE_MODEL_DETECTION_DIR)
 
 threshold = 0.15
 
+state = "Uploader"
+
+if "state" not in st.session_state :
+    st.session_state["state"] = "Uploader"
+
 def read_license_plate(license_plate_crop, img):
 
     scores = 0
@@ -47,14 +52,17 @@ def read_license_plate(license_plate_crop, img):
         length = np.sum(np.subtract(result[0][1], result[0][0]))
         height = np.sum(np.subtract(result[0][2], result[0][1]))
         
-        if length*height / rectangle_size > 0.20:
+        if length*height / rectangle_size > 0.17:
             bbox, text, score = result
             text = result[1]
             text = text.upper()
             scores += score
             plate.append(text)
-            
-    return " ".join(plate), scores/len(plate)
+    
+    if len(plate) != 0 : 
+        return " ".join(plate), scores/len(plate)
+    else :
+        return " ".join(plate), 0
 
 def model_prediction(img):
     license_numbers = 0
@@ -116,6 +124,14 @@ def model_prediction(img):
         img_wth_box = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return [img_wth_box]
     
+
+def change_state_uploader() :
+    st.session_state["state"] = "Uploader"
+
+    
+def change_state_camera() :
+    st.session_state["state"] = "Camera"
+    
 with header :
     _, col1, _ = st.columns([0.2,1,0.1])
     col1.title("💥 License Car Plate Detection 🚗")
@@ -139,9 +155,22 @@ with body :
     _, col1, _ = st.columns([0.1,1,0.2])
     col1.subheader("Check It-out the License Car Plate Detection Model 🔎!")
 
+    _, colb1, colb2 = st.columns([0.5,0.6,1])
+
+    if colb1.button("Upload an Image", on_click=change_state_uploader) :
+        pass
+    elif colb2.button("Take a Photo", on_click=change_state_camera) :
+        pass
+
+    if st.session_state["state"] == "Uploader" :
+        img = st.file_uploader("Upload a Car Image: ", type=["png", "jpg", "jpeg"])
+    elif st.session_state["state"] == "Camera" :
+        img = st.camera_input("Take a Photo: ")
+
+
     #img = st.file_uploader("Upload a Car Image: ", type=["png", "jpg", "jpeg"])
-    img = st.camera_input("Take a Photo: ")
-    
+    #img = st.camera_input("Take a Photo: ")
+
     _, col2, _ = st.columns([0.3,1,0.2])
 
     _, col5, _ = st.columns([0.8,1,0.2])
