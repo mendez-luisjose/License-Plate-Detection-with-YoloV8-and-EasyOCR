@@ -8,6 +8,8 @@ import pandas as pd
 from util import set_background, write_csv
 import uuid
 import os
+from  streamlit_webrtc import webrtc_streamer
+import av
 
 set_background("./imgs/background.png")
 
@@ -31,6 +33,38 @@ state = "Uploader"
 
 if "state" not in st.session_state :
     st.session_state["state"] = "Uploader"
+
+class VideoProcessor:
+    def recv(self, frame) :
+        img = frame.to_ndarray(format="bgr24")
+        img_to_an = img.copy()
+        img_to_an = cv2.cvtColor(img_to_an, cv2.COLOR_RGB2BGR)
+        license_detections = license_plate_detector(img_to_an)[0]
+
+        if len(license_detections.boxes.cls.tolist()) != 0 :
+            for license_plate in license_detections.boxes.data.tolist() :
+                x1, y1, x2, y2, score, class_id = license_plate
+
+                cv2.rectangle(img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 3)
+
+                license_plate_crop = img[int(y1):int(y2), int(x1): int(x2), :]
+            
+                license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY) 
+
+                license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_gray, img)
+                print(license_plate_text)
+
+                cv2.rectangle(img, (int(x1) - 40, int(y1) - 40), (int(x2) + 40, int(y1)), (255, 255, 255), cv2.FILLED)
+                cv2.putText(img,
+                            str(license_plate_text),
+                            (int((int(x1) + int(x2)) / 2) - 70, int(y1) - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            1,
+                            (0, 0, 0),
+                            3)
+
+        return av.VideoFrame.from_ndarray(img, format="bgr24")
+    
 
 def read_license_plate(license_plate_crop, img):
 
@@ -94,7 +128,7 @@ def model_prediction(img):
             license_plate_crop = img[int(y1):int(y2), int(x1): int(x2), :]
 
             img_name = '{}.jpg'.format(uuid.uuid1())
-        
+         
             cv2.imwrite(os.path.join(folder_path, img_name), license_plate_crop)
 
             license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY) 
@@ -131,6 +165,9 @@ def change_state_uploader() :
     
 def change_state_camera() :
     st.session_state["state"] = "Camera"
+
+def change_state_live() :
+    st.session_state["state"] = "Live"
     
 with header :
     _, col1, _ = st.columns([0.2,1,0.1])
@@ -155,18 +192,22 @@ with body :
     _, col1, _ = st.columns([0.1,1,0.2])
     col1.subheader("Check It-out the License Car Plate Detection Model 🔎!")
 
-    _, colb1, colb2 = st.columns([0.5,0.6,1])
+    _, colb1, colb2, colb3 = st.columns([0.2, 0.7, 0.6, 1])
 
     if colb1.button("Upload an Image", on_click=change_state_uploader) :
         pass
     elif colb2.button("Take a Photo", on_click=change_state_camera) :
+        pass
+    elif colb3.button("Live Detection", on_click=change_state_live) :
         pass
 
     if st.session_state["state"] == "Uploader" :
         img = st.file_uploader("Upload a Car Image: ", type=["png", "jpg", "jpeg"])
     elif st.session_state["state"] == "Camera" :
         img = st.camera_input("Take a Photo: ")
-
+    elif st.session_state["state"] == "Live" :
+        webrtc_streamer(key="sample", video_processor_factory=VideoProcessor)
+        img = None
 
     #img = st.file_uploader("Upload a Car Image: ", type=["png", "jpg", "jpeg"])
     #img = st.camera_input("Take a Photo: ")
