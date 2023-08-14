@@ -52,7 +52,6 @@ class VideoProcessor:
                 license_plate_crop_gray = cv2.cvtColor(license_plate_crop, cv2.COLOR_BGR2GRAY) 
 
                 license_plate_text, license_plate_text_score = read_license_plate(license_plate_crop_gray, img)
-                print(license_plate_text)
 
                 cv2.rectangle(img, (int(x1) - 40, int(y1) - 40), (int(x2) + 40, int(y1)), (255, 255, 255), cv2.FILLED)
                 cv2.putText(img,
@@ -67,11 +66,9 @@ class VideoProcessor:
     
 
 def read_license_plate(license_plate_crop, img):
-
     scores = 0
     detections = reader.readtext(license_plate_crop)
 
-    print(detections)
     width = img.shape[1]
     height = img.shape[0]
     
@@ -112,7 +109,6 @@ def model_prediction(img):
             xcar1, ycar1, xcar2, ycar2, car_score, class_id = detection
 
             if int(class_id) in vehicles :
-                #detections_.append([xcar1, ycar1, xcar2, ycar2, car_score])
                 cv2.rectangle(img, (int(xcar1), int(ycar1)), (int(xcar2), int(ycar2)), (0, 0, 255), 3)
     else :
             xcar1, ycar1, xcar2, ycar2 = 0, 0, 0, 0
@@ -209,9 +205,6 @@ with body :
         webrtc_streamer(key="sample", video_processor_factory=VideoProcessor)
         img = None
 
-    #img = st.file_uploader("Upload a Car Image: ", type=["png", "jpg", "jpeg"])
-    #img = st.camera_input("Take a Photo: ")
-
     _, col2, _ = st.columns([0.3,1,0.2])
 
     _, col5, _ = st.columns([0.8,1,0.2])
@@ -226,7 +219,6 @@ with body :
 
             if len(results) == 3 :
                 prediction, texts, license_plate_crop = results[0], results[1], results[2]
-                print(results[1], len(license_plate_crop))
 
                 texts = [i for i in texts if i is not None]
                 
