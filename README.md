@@ -1,17 +1,13 @@
-# GANs Avatar Faces Model 🤖
+# License Plate Recognition 🚗
 
-![](./imgs/avatars_gan.gif)
+![](./license_detection.gif)
 
-## Multi Classification Person-Dog-Cat Model with Transfer Learning
+## License Plate Detection and Extraction with YoloV8 and EasyOCR
 
-This Deep Convolutional Generative Adversarial Network `(GANs)` generates Avatar Faces.
-
-It was trained with over 20.000 Images, using TensorFlow and the Google Colab GPU.
+Using both the `COCO Model` Model to detect the vehicles and the `License Plate Model` to recognize the plate, and then with EasyOCR to extract the info from the plate.
 
 ## Check-it out
-Test the Model by running the `app.py` file, built with `Streamlit`.
-
-The code of the Model is in the  `gans_avatar_faces` file.
+Test it by running the `app.py` file, built with `Streamlit`.
 
 <img src="interface.png" width="800"/>
 
@@ -21,4 +17,4 @@ streamlit run app.py
 ```
 
 ## Resources
-- Avatar Dataset: https://www.kaggle.com/datasets/soumikrakshit/anime-faces
+- Licenses Plates Dataset: https://universe.roboflow.com/roboflow-universe-projects/license-plate-recognition-rxg4e/dataset/4
